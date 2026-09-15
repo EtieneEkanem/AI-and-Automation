@@ -1,0 +1,1085 @@
+{
+  "name": "TRIB3-01 Load Knowledge Base",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\n welcome to TRIB3 Lagos. I can help with opening hours, location, selected \nmenu options, reservation enquiries, events, photoshoots and guest support. How may I assist you?",
+        "options": {
+          "allowedOrigins": "https://37e20992-40e9-4581-b70e-79f6fc377d7a.lovableproject.com,https://trib3-chat-concierge.lovable.app",
+          "loadPreviousSession": "memory",
+          "responseMode": "lastNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1104,
+        208
+      ],
+      "id": "391771ea-8bf2-49ba-b927-f400d12d40a9",
+      "name": "When chat message received",
+      "webhookId": "9741988a-63d8-4d99-90d1-cbf286c8b51b"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the TRIB3 Lagos Guest Experience Assistant, an AI customer-support assistant running inside \nn8n.\nYOUR ROLE\nHelp guests with verified restaurant information, selected food-menu recommendations, reservation \nenquiries, event or photoshoot enquiries, order/pickup questions and basic support. Your tone must be \nwarm, professional, concise and practical.\nKNOWLEDGE RULE\nYou have a tool named trib3_knowledge_base. ALWAYS use that tool before answering any question about \nTRIB3 Lagos facts, opening hours, location, menu, prices, bookings, events, policies or support \nprocedures. Treat the tool as the approved source of truth. Do not rely on general knowledge, memory \nor assumptions for restaurant facts.\nIf the required answer is not in the knowledge base, clearly state that it is not confirmed and refer \nthe guest to staff. Never invent an answer.\nCORE BEHAVIOUR\n1. Give the direct answer first.\n2. Ask only for missing details that are necessary to continue.\n3. Keep normal responses between two and six sentences unless a structured summary is useful.\n4. Use NGN for prices and call them “listed prices.”\n5. Do not claim live availability unless a connected live booking system confirms it.\n6. Never promise a refund, discount, compensation, reservation, event slot or special treatment.\n7. Never guarantee that food is allergen-free or safe from cross-contact.\n8. Never ask for passwords, OTPs, PINs, CVVs or full card numbers.\n9. Do not expose one customer's information to another customer.\nRESERVATION PROCESS\nWhen a guest wants a new table reservation, collect these required details:- full name- phone number- requested date- requested time- number of guests\nOptional details: email, occasion, seating preference and special request.\nIf any required detail is missing, ask for only the missing details and use ROUTE_CODE: STANDARD.\nWhen all required details are present, provide a clear summary, state that it is a reservation request \nand not a confirmed booking, and use ROUTE_CODE: RESERVATION.\nEVENT OR PHOTOSHOOT PROCESS\nFor an event, collect event type, preferred date, preferred start time, expected guest count, contact \nname and phone number. Budget is optional but useful.\nFor a photoshoot, collect preferred date, preferred time, estimated duration, team size, purpose, \ncontact name and phone number.\nIf required details are missing, ask for them and use ROUTE_CODE: STANDARD.\nWhen enough details are available for staff review, provide a summary, avoid quoting prices or \nconfirming availability, and use ROUTE_CODE: EVENT.\nHUMAN ESCALATION\nUse ROUTE_CODE: HUMAN for any of the following:- explicit request for a person- severe allergy, medical dietary safety or uncertain food safety- complaint involving food quality, hygiene, staff conduct, injury, security or harassment- refund, duplicate charge, failed payment or disputed transaction- change or cancellation of an existing reservation- lost property- event, photoshoot or VIP pricing or live availability when staff action is required- missing, conflicting, uncertain or likely outdated information- two unsuccessful attempts to solve the customer's issue\nFor a human case:- apologize briefly when appropriate- explain that staff review is required- collect only safe and necessary details"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -752,
+        192
+      ],
+      "id": "79e834a2-88c4-4bcf-92bd-b9bc80de48a9",
+      "name": "TRIB3 AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Verified restaurant information, selected food menu, FAQs, booking rules, support \npolicies and escalation rules for TRIB3 Lagos. Always use this tool before answering a TRIB3 factual \nquestion.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "trib3_lagos_kb_v1",
+          "mode": "list",
+          "cachedResultName": "trib3_lagos_kb_v1"
+        },
+        "topK": 6
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -496,
+        416
+      ],
+      "id": "0c6fcd75-3c59-4a15-81b8-1736b0ee3ea8",
+      "name": "trib3_knowledge_base"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        512
+      ],
+      "id": "b63e9f63-de61-44ab-be55-36c08f1254ba",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xX0OtcFKs8vI5At8",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = String($json.output ?? '');\nconst match = raw.match(/ROUTE_CODE:\\s*(STANDARD|RESERVATION|EVENT|HUMAN)/i);\nconst routeCode = match ? match[1].toUpperCase() : 'STANDARD';\nconst customerResponse = raw\n  .replace(/\\n?ROUTE_CODE:\\s*(STANDARD|RESERVATION|EVENT|HUMAN)\\s*$/i, '')\n  .trim();\nreturn [{\n  json: {\n    ...$json,\n    route_code: routeCode,\n    customer_response: customerResponse\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        192
+      ],
+      "id": "c016b475-9bfd-4136-9e11-5f9933409324",
+      "name": "Parse Route"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.route_code}}",
+                    "rightValue": "HUMAN",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c7ac0eef-9306-4775-9691-a229c5c7f429"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "880c3f35-4ac1-4284-8a34-5070cd7a5a0e",
+                    "leftValue": "={{$json.route_code}}",
+                    "rightValue": "RESERVATION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0e9cef1f-8c39-4faa-869e-465f9594bd42",
+                    "leftValue": "={{$json.route_code}}",
+                    "rightValue": "EVENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        192
+      ],
+      "id": "49d6c42b-4813-4378-935c-66e9a6d013f2",
+      "name": "Route Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3429be8f-9710-4b09-bec8-1920dd3dd93b",
+              "name": "timestamp",
+              "value": "={{$now}}",
+              "type": "string"
+            },
+            {
+              "id": "4138f5dc-45c5-471a-a7d8-fe742ad3e7e0",
+              "name": "session_id",
+              "value": "={{$node[\"When chat message received\"].json.sessionId}}",
+              "type": "string"
+            },
+            {
+              "id": "e0c61fd9-f76c-4cb3-9905-09e59caf9c92",
+              "name": "route_code",
+              "value": "={{$json.route_code}}",
+              "type": "string"
+            },
+            {
+              "id": "93594454-fdd7-4247-bce2-903c38dcb143",
+              "name": "customer_message",
+              "value": "={{$node[\"When chat message received\"].json.chatInput}}",
+              "type": "string"
+            },
+            {
+              "id": "ec46694e-fc8c-443d-bb5a-e66263638806",
+              "name": "assistant_response",
+              "value": "={{$json.customer_response}}",
+              "type": "string"
+            },
+            {
+              "id": "e3b5b678-6cb6-4fc5-8c58-345947871065",
+              "name": "status",
+              "value": " New",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        144
+      ],
+      "id": "6ffb0a3b-8c75-4d03-bab2-a10a2efa0a20",
+      "name": "Prepare Reservation Record"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3429be8f-9710-4b09-bec8-1920dd3dd93b",
+              "name": "timestamp",
+              "value": "= {{$now}}",
+              "type": "string"
+            },
+            {
+              "id": "4138f5dc-45c5-471a-a7d8-fe742ad3e7e0",
+              "name": "session_id",
+              "value": "={{$node[\"When chat message received\"].json.sessionId}}",
+              "type": "string"
+            },
+            {
+              "id": "e0c61fd9-f76c-4cb3-9905-09e59caf9c92",
+              "name": "route_code",
+              "value": "={{$json.route_code}}",
+              "type": "string"
+            },
+            {
+              "id": "93594454-fdd7-4247-bce2-903c38dcb143",
+              "name": "customer_message",
+              "value": "={{$node[\"When chat message received\"].json.chatInput}}",
+              "type": "string"
+            },
+            {
+              "id": "ec46694e-fc8c-443d-bb5a-e66263638806",
+              "name": "assistant_response",
+              "value": "={{$json.customer_response}}",
+              "type": "string"
+            },
+            {
+              "id": "e3b5b678-6cb6-4fc5-8c58-345947871065",
+              "name": "status",
+              "value": " New",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        304
+      ],
+      "id": "f0f63b26-8e39-4332-b6db-c927c89b14a5",
+      "name": "Prepare Event Record"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw",
+          "mode": "list",
+          "cachedResultName": "TRIB3 AI Assistant Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            " timestamp": "={{$json.timestamp}}",
+            "session_id": "={{$json.session_id}}",
+            "route_code": "={{$json.route_code}}",
+            "customer_message": "={{$json.customer_message}}",
+            "assistant_response": "={{$json.assistant_response}}",
+            "status": "={{$json.status}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": " timestamp",
+              "displayName": " timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "route_code",
+              "displayName": "route_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_message",
+              "displayName": "customer_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assistant_response",
+              "displayName": "assistant_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        288,
+        144
+      ],
+      "id": "dee307c7-cee6-493d-8c32-ad6db3e78897",
+      "name": "Log Reservation Request",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VtJ8MngFH6aeGpfE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "blessingetiene@gmail.com",
+        "subject": "=New TRIB3 reservation enquiry - {{$node[\"Parse Route\"].json.route_code}}",
+        "message": "={{ `New reservation enquiry received through the TRIB3 n8n assistant.\n\nSession:\n${$node[\"Prepare Reservation Record\"].json.session_id}\n\nCustomer message:\n${$node[\"Prepare Reservation Record\"].json.customer_message}\n\nAssistant summary:\n${$node[\"Prepare Reservation Record\"].json.assistant_response}\n\nReview the request before confirming any reservation.` }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        144
+      ],
+      "id": "8fdbab08-e211-425c-a25b-1ec2332a27b2",
+      "name": "Notify Reservation Reviewer",
+      "webhookId": "daa6152b-1ce8-42b0-9ae5-37d527d358df",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SL0HINicSBj9fKo1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw",
+          "mode": "list",
+          "cachedResultName": "TRIB3 AI Assistant Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            " timestamp": "={{$json.timestamp}}",
+            "session_id": "={{$json.session_id}}",
+            "route_code": "={{$json.route_code}}",
+            "customer_message": "={{$json.customer_message}}",
+            "assistant_response": "={{$json.assistant_response}}",
+            "status": "={{$json.status}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": " timestamp",
+              "displayName": " timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "route_code",
+              "displayName": "route_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_message",
+              "displayName": "customer_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assistant_response",
+              "displayName": "assistant_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        304
+      ],
+      "id": "a7dc9f55-903c-4b37-a1e9-6fb73bc0065b",
+      "name": "Log Event Request",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VtJ8MngFH6aeGpfE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "blessingetiene@gmail.com",
+        "subject": "=New TRIB3 event or photoshoot enquiry - {{$node[\"Parse Route\"].json.route_code}}",
+        "message": "=New event or photoshoot enquiry received through the TRIB3 n8n assistant.\n\nSession: {{$node[\"Chat Trigger\"].json.sessionId}}\n\nCustomer message:\n{{$node[\"Chat Trigger\"].json.chatInput}}\n\nAssistant summary:\n{{$node[\"Parse Route\"].json.customer_response}}\n\nReview the request before confirming availability, pricing or event arrangements.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        304
+      ],
+      "id": "742eedc8-49f0-4ee6-b4b4-9c391ad20d5b",
+      "name": "Notify Event Reviewer",
+      "webhookId": "daa6152b-1ce8-42b0-9ae5-37d527d358df",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SL0HINicSBj9fKo1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3429be8f-9710-4b09-bec8-1920dd3dd93b",
+              "name": "timestamp",
+              "value": "={{$now}}",
+              "type": "string"
+            },
+            {
+              "id": "4138f5dc-45c5-471a-a7d8-fe742ad3e7e0",
+              "name": "session_id",
+              "value": "={{$node[\"When chat message received\"].json.sessionId}}",
+              "type": "string"
+            },
+            {
+              "id": "e0c61fd9-f76c-4cb3-9905-09e59caf9c92",
+              "name": "route_code",
+              "value": "={{$json.route_code}}",
+              "type": "string"
+            },
+            {
+              "id": "93594454-fdd7-4247-bce2-903c38dcb143",
+              "name": "customer_message",
+              "value": "={{$node[\"When chat message received\"].json.chatInput}}",
+              "type": "string"
+            },
+            {
+              "id": "ec46694e-fc8c-443d-bb5a-e66263638806",
+              "name": "assistant_response",
+              "value": "={{$json.customer_response}}",
+              "type": "string"
+            },
+            {
+              "id": "e3b5b678-6cb6-4fc5-8c58-345947871065",
+              "name": "status",
+              "value": " New",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3993085a-899a-4d16-bdb2-85c7e146900d",
+      "name": "Prepare Human Escalation"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw",
+          "mode": "list",
+          "cachedResultName": "TRIB3 AI Assistant Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zxFOmf_piy1WH7PyXmC50DatuErNzxH4laCiIYGAPrw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            " timestamp": "={{$json.timestamp}}",
+            "session_id": "={{$json.session_id}}",
+            "route_code": "={{$json.route_code}}",
+            "customer_message": "={{$json.customer_message}}",
+            "assistant_response": "={{$json.assistant_response}}",
+            "status": "={{$json.status}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": " timestamp",
+              "displayName": " timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "route_code",
+              "displayName": "route_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_message",
+              "displayName": "customer_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assistant_response",
+              "displayName": "assistant_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        0
+      ],
+      "id": "2af48ba4-286e-47dd-878b-cb665da0acd2",
+      "name": "Log Human Escalation",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VtJ8MngFH6aeGpfE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "blessingetiene@gmail.com",
+        "subject": "=URGENT - TRIB3 human escalation required - {{$node[\"Parse Route\"].json.route_code}}",
+        "message": "=A customer request requires human review.\n\nRoute: HUMAN\n\nSession:\n{{$node[\"Prepare Human Escalation\"].json.session_id}}\n\nCustomer message:\n{{$node[\"Prepare Human Escalation\"].json.customer_message}}\n\nAssistant response:\n{{$node[\"Prepare Human Escalation\"].json.assistant_response}}\n\nDo not request sensitive card or authentication details. Review and follow up through an authorised channel.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        0
+      ],
+      "id": "89acc707-6664-4d3e-b81b-2a55902281e5",
+      "name": "Notify Human Reviewer",
+      "webhookId": "daa6152b-1ce8-42b0-9ae5-37d527d358df",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SL0HINicSBj9fKo1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nex-agi/nex-n2-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        336
+      ],
+      "id": "44efd115-c572-481e-9fd7-c700edccd73b",
+      "name": "TRIB3 OpenRouter Credential",
+      "credentials": {
+        "openRouterApi": {
+          "id": "k2dshkjulIPxHu9A",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        -848,
+        592
+      ],
+      "id": "d6bc7572-05f4-4fb6-9484-672e17d0c385",
+      "name": "Supabase Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "uLaSLptEWztRpmlu",
+          "name": "TRIB3 Supabase Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0448529-0bf3-47ff-87c9-4e8f52e02055",
+              "name": "output",
+              "value": "={{ $node[\"Parse Route\"].json[\"customer_response\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -32,
+        432
+      ],
+      "id": "64602382-7d86-41fe-9e31-224e7c6ceb6e",
+      "name": "Standard Output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2653afac-b43e-4d1b-9743-9d7d7e43623f",
+              "name": "output",
+              "value": "= {{ $node[\"Parse Route\"].json[\"customer_response\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        688,
+        160
+      ],
+      "id": "adf38368-2f9a-4513-9495-b536174131bc",
+      "name": "Reservation Output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2653afac-b43e-4d1b-9743-9d7d7e43623f",
+              "name": "output",
+              "value": "= {{ $node[\"Parse Route\"].json[\"customer_response\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        304
+      ],
+      "id": "530aeafc-af53-4f0e-b63d-560cd10929ec",
+      "name": "Event Output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2653afac-b43e-4d1b-9743-9d7d7e43623f",
+              "name": "output",
+              "value": "= {{ $node[\"Parse Route\"].json[\"customer_response\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        544,
+        0
+      ],
+      "id": "d56b6ec1-fbf0-4ace-9e15-d31deef84123",
+      "name": "Human Output"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "TRIB3 AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trib3_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "TRIB3 AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "trib3_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TRIB3 AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Route": {
+      "main": [
+        [
+          {
+            "node": "Route Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Request": {
+      "main": [
+        [
+          {
+            "node": "Prepare Human Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Reservation Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Event Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Standard Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Reservation Record": {
+      "main": [
+        [
+          {
+            "node": "Log Reservation Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Reservation Request": {
+      "main": [
+        [
+          {
+            "node": "Notify Reservation Reviewer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Reservation Reviewer": {
+      "main": [
+        [
+          {
+            "node": "Reservation Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Event Record": {
+      "main": [
+        [
+          {
+            "node": "Log Event Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Event Request": {
+      "main": [
+        [
+          {
+            "node": "Notify Event Reviewer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Event Reviewer": {
+      "main": [
+        [
+          {
+            "node": "Event Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Human Escalation": {
+      "main": [
+        [
+          {
+            "node": "Log Human Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Human Escalation": {
+      "main": [
+        [
+          {
+            "node": "Notify Human Reviewer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Human Reviewer": {
+      "main": [
+        [
+          {
+            "node": "Human Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TRIB3 OpenRouter Credential": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "TRIB3 AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "TRIB3 AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "When chat message received",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a7e9cc2f-3be1-4285-a2a5-c7f9384ca2fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "687346e539a5f5c17f5d498946d285b9ef46ce3bec8145a9a96ba2b29f2f51ed"
+  },
+  "nodeGroups": [],
+  "id": "308QG35MqzO3J8un",
+  "tags": []
+}

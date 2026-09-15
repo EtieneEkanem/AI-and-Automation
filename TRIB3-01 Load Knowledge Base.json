@@ -1,0 +1,153 @@
+{
+  "name": "TRIB3-01 Load Knowledge Base",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6f794558-1cc5-41cf-9920-1a2e5c0ebf37",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aaf4dc78-b424-4c58-9b18-8051703140d0",
+              "name": "knowledge_base",
+              "value": "TRIB3 LAGOS AI ASSISTANT KNOWLEDGE BASE Version: 2.0 - n8n assignment edition Last reviewed: 18 July 2026  1. OPERATING RULES - Answer restaurant questions only from this knowledge base or from a verified connected business system. - Never invent opening hours, menu items, prices, ingredients, booking availability, policies, discounts, refunds or promises. - A reservation enquiry is not a confirmed booking. Only an authorised staff member or live booking system can confirm it. - Menu prices and availability may change. Use phrases such as “listed price” and ask the guest to confirm current availability with staff when necessary. - Never guarantee that a dish is allergen-free or safe from cross-contact. - Never ask for passwords, OTPs, PINs, CVVs or full payment-card numbers. - Complaints, refunds, disputed payments, severe allergies, safety concerns, lost property and changes to an existing booking require human review.  2. BUSINESS PROFILE Official name: TRIB3 Lagos Business type: Afro-fusion performance-dining restaurant Address: 288B Ajose Adeogun Street, Victoria Island, Lagos, Nigeria Phone: +234 916 986 4838 Booking email: bookings@trib3lagos.com Opening hours: Monday-Friday, 4:00 PM-2:00 AM Opening hours: Saturday-Sunday, 12:00 PM-2:00 AM Publicly listed enquiry types: table bookings, photoshoots, event hosting, order and pickup Official website: https://www.trib3lagos.com/ Official menu page: https://www.trib3lagos.com/menus  3. GENERAL FAQ Q: Where is TRIB3 Lagos located? A: 288B Ajose Adeogun Street, Victoria Island, Lagos. Guests should use a current map application or call the restaurant for detailed directions.  Q: What are the opening hours? A: Monday-Friday, 4:00 PM-2:00 AM. Saturday-Sunday, 12:00 PM-2:00 AM. Special-event or holiday hours should be confirmed with staff.  Q: How can I contact the restaurant? A: Call +234 916 986 4838 or email bookings@trib3lagos.com.  Q: What type of food does the restaurant serve? A: TRIB3 Lagos describes its concept as Afro-fusion performance dining, combining food, ambience and entertainment.  Q: Is there a performance every night? A: A performance on a particular date is not confirmed in this knowledge base. Refer the guest to staff for the current event schedule.  4. RESERVATION ENQUIRIES The assistant may collect: full name, phone number, email if offered, requested date, requested time, number of guests, occasion, seating preference and special request. Required before routing a completed reservation enquiry: full name, phone number, requested date, requested time and party size. When all required details are available, summarise them and state: “This is a reservation request, not a confirmed booking. The TRIB3 Lagos team must confirm availability.” Do not state that a table is available unless a live booking system or authorised staff member confirms it.  Q: Can I reserve a table? A: Yes. Collect the requested date, time, party size, booking name and phone number. Final confirmation must come from the restaurant team.  Q: Can I change or cancel an existing reservation? A: This requires a human team member. Collect the booking name, phone number, original date and time, and the requested change.  5. EVENT AND PHOTOSHOOT ENQUIRIES TRIB3 Lagos publicly presents event-hosting and photoshoot enquiry options. Capacity, deposits, minimum spend, package pricing and live availability are not confirmed here. For an event enquiry, collect: event type, preferred date, preferred start time, expected guest count, budget range if known, contact name and phone number. For a photoshoot enquiry, collect: preferred date, time, estimated duration, team size, purpose, contact name and phone number. Do not quote a package price or confirm availability. Route a completed enquiry to staff.  6. ORDER AND PICKUP The official site presents an order-and-pickup option. Delivery zones, delivery fees, fulfilment time, payment methods and current stock are not confirmed in this knowledge base. Refer the guest to staff for current details.  7. SELECTED FOOD MENU SNAPSHOT Use this snapshot only for simple examples and budget recommendations. Prices are listed public prices reviewed on 18 July 2026 and may change. - Vegetable Spring Rolls - NGN 8,750 - Chicken Spring Rolls - NGN 10,750 - Chicken Lollipop - NGN 11,250 - Beef Suya and Fries - NGN 11,750 - Chicken Burger - NGN 14,500 - Suya Wrap - NGN 18,000 - Asun Rosie Penne - NGN 18,000 - Grilled Chicken Breast - NGN 21,500 - Chicken Escalope - NGN 21,500 - Grilled Lamb Chops - NGN 23,500 - Half Roasted Chicken - NGN 26,000 - Brownies - NGN 8,750 - Cheesecake - NGN 10,750 - Jollof Rice - NGN 6,500 - French Fries - NGN 6,500  Menu recommendation rules: - Ask for budget, preferred protein and important dislikes when missing. - Recommend two to four matching items from the available snapshot. - State the item name and listed price. - Do not claim an item is vegan, halal, gluten-free, nut-free or medically safe unless staff confirms it. - For any menu item not present in the snapshot, refer the guest to the current menu page or staff.  8. DIETARY AND ALLERGY REQUESTS The knowledge base does not contain verified dietary certification or cross-contact information. Severe allergy, medical diet and religious-diet questions must be confirmed by the kitchen or restaurant team. Never guarantee safety.  9. COMPLAINTS, REFUNDS AND PAYMENT DISPUTES Apologise briefly and explain that a staff member must review the matter. Collect only: customer name, phone number, visit date, approximate time, order or receipt reference if available, and a short description. Never request a full card number, PIN, CVV or OTP. Never promise a refund, discount or compensation.  10. LOST PROPERTY Collect the guest's name, phone number, visit date and time, table or area if known, and a clear description of the item. Route to staff. Do not claim the item has been found unless staff confirms it.  11. POLICIES NOT CONFIRMED - ALWAYS REFER TO STAFF - Reservation deposit or minimum spend - Reservation grace period, late-arrival, cancellation and no-show rules - Dress code - Parking or valet arrangements - Children and family policy - Accessibility arrangements - Outside cake, decoration or corkage rules - Event capacity, package details and pricing - Delivery zones, fees and fulfilment times - Exact entertainment schedule - Ingredient substitutions, current stock and formal allergen controls  12. HUMAN ESCALATION CATEGORIES Use human escalation when: - The customer asks for a human. - There is a severe allergy, medical food-safety concern or uncertain dietary safety. - There is a complaint involving food quality, hygiene, staff conduct, injury, security or harassment. - There is a refund request, duplicate charge, payment failure or disputed transaction. - The customer wants to change or cancel an existing booking. - The customer reports lost property. - The customer requests event, photoshoot or VIP pricing or live availability. - The answer is missing, conflicting, uncertain or likely outdated. - The assistant has tried twice and still cannot resolve the enquiry.  Standard escalation wording: “This needs a member of the TRIB3 Lagos team because it involves [brief reason]. I can record the relevant details, but I cannot confirm the final outcome. You may also contact the team on +234 916 986 4838 or bookings@trib3lagos.com.”  13. DATA PRIVACY - Collect only information required for the current enquiry. - Do not expose another guest's booking, contact or payment information. - Do not ask for sensitive payment or authentication information. - Keep staff summaries limited to operational facts.  14. MAINTENANCE Review contact details, hours, menu prices and restaurant policies regularly. For this assignment, rerun the n8n knowledge-base loader after changing this text or after restarting an n8n instance that uses the Simple Vector Store.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "53316fa0-d02d-40b0-877c-ac305c66328c",
+      "name": "Knowledge Base Text"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "trib3_lagos_kb_v1",
+          "mode": "list",
+          "cachedResultName": "trib3_lagos_kb_v1"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        0
+      ],
+      "id": "1ac8d902-ff82-4e3e-ba94-f49f822108b7",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        480,
+        208
+      ],
+      "id": "e38965a6-419f-46d9-9dde-ded0874bec51",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Y0HYKilykv9PHyCT",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "splitPages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        224
+      ],
+      "id": "944e056d-55d4-413d-9375-478e2444c41f",
+      "name": "Default Data Loader"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Knowledge Base Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledge Base Text": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d78fae10-6903-4580-9d44-fe9f1906974b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "774d8c3d29acc1141aa0e05d8dfcd28aa321dfdf2378c40e04d7a5113d1bd062"
+  },
+  "nodeGroups": [],
+  "id": "zBEDvJqDB9YlW6kp",
+  "tags": []
+}
